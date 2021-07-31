@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Linq;
+using leave_management.Data;
 using System.Collections.Generic;
 using leave_management.Contracts;
-using leave_management.Data;
 
 namespace leave_management.Repository
 {
@@ -14,35 +15,28 @@ namespace leave_management.Repository
             _db = db;
         }
 
-        public ICollection<LeaveHistory> FindAll()
-        {
-            throw new NotImplementedException();
-        }
+        public ICollection<LeaveHistory> FindAll() => _db.LeaveHistories.ToList();
 
-        public LeaveHistory FindById(int id)
-        {
-            throw new NotImplementedException();
-        }
+        public LeaveHistory FindById(int id) => _db.LeaveHistories.SingleOrDefault(l => l.Id == id);
 
         public bool Create(LeaveHistory entity)
         {
-            throw new NotImplementedException();
+            _db.LeaveHistories.Add(entity);
+            return Save();
         }
 
         public bool Update(LeaveHistory entity)
         {
-            throw new NotImplementedException();
+            _db.LeaveHistories.Update(entity);
+            return Save();
         }
 
         public bool Delete(LeaveHistory entity)
         {
-            throw new NotImplementedException();
+            _db.LeaveHistories.Remove(entity);
+            return Save();
         }
 
-        public bool Save()
-        {
-            throw new NotImplementedException();
-        }
-
+        public bool Save() => _db.SaveChanges() > 0;
     }
 }

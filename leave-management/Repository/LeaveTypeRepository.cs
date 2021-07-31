@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Linq;
+using leave_management.Data;
 using System.Collections.Generic;
 using leave_management.Contracts;
-using leave_management.Data;
 
 namespace leave_management.Repository
 {
@@ -14,32 +15,31 @@ namespace leave_management.Repository
             _db = db;
         }
 
-        public ICollection<LeaveType> FindAll()
-        {
-            throw new NotImplementedException();
-        }
+        public ICollection<LeaveType> FindAll() => _db.LeaveTypes.ToList();
 
-        public LeaveType FindById(int id)
-        {
-            throw new NotImplementedException();
-        }
+        public LeaveType FindById(int id) => _db.LeaveTypes.SingleOrDefault(l => l.Id == id);
 
         public bool Create(LeaveType entity)
         {
-            throw new NotImplementedException();
+            _db.LeaveTypes.Add(entity);
+            return Save();
         }
 
         public bool Update(LeaveType entity)
         {
-            throw new NotImplementedException();
+            _db.LeaveTypes.Update(entity);
+            return Save();
         }
 
         public bool Delete(LeaveType entity)
         {
-            throw new NotImplementedException();
+            _db.LeaveTypes.Remove(entity);
+            return Save();
         }
 
-        public bool Save()
+        public bool Save() => _db.SaveChanges() > 0;
+
+        public ICollection<LeaveType> GetEmployeesByLeaveType(int id)
         {
             throw new NotImplementedException();
         }
