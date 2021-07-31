@@ -18,6 +18,7 @@ namespace leave_management.Repository
         public ICollection<LeaveAllocation> FindAll() => _db.LeaveAllocations.ToList();
 
         public LeaveAllocation FindById(int id) => _db.LeaveAllocations.SingleOrDefault(l => l.Id == id);
+        public bool Exists(int id) => _db.LeaveAllocations.Any(l => l.Id == id);
 
         public bool Create(LeaveAllocation entity)
         {

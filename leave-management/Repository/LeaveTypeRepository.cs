@@ -19,6 +19,8 @@ namespace leave_management.Repository
 
         public LeaveType FindById(int id) => _db.LeaveTypes.SingleOrDefault(l => l.Id == id);
 
+        public bool Exists(int id) => _db.LeaveTypes.Any(l => l.Id == id);
+
         public bool Create(LeaveType entity)
         {
             _db.LeaveTypes.Add(entity);
