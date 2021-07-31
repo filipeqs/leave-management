@@ -14,4 +14,12 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.16" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Contracts\" />
+    <None Remove="Repository\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Contracts\" />
+    <Folder Include="Repository\" />
+  </ItemGroup>
 </Project>
