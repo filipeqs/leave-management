@@ -118,5 +118,26 @@ namespace leave_management.Controllers
                 return View(model);
             }
         }
+
+        // GET: LeaveTypes/Delete/5
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                if (!_repo.Exists(id))
+                    return NotFound();
+
+                var leaveType = _repo.FindById(id);
+                var isSuccess = _repo.Delete(leaveType);
+                if (!isSuccess)
+                    return BadRequest();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
     }
 }
