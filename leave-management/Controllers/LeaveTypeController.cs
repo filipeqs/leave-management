@@ -7,6 +7,7 @@ using leave_management.Contracts;
 using leave_management.Data;
 using leave_management.Models;
 using leave_management.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace leave_management.Controllers
@@ -26,9 +27,44 @@ namespace leave_management.Controllers
         public IActionResult Index()
         {
             var leaveTypes = _repo.FindAll().ToList();
-            var model = _mapper.Map<List<LeaveType>, List<DetailsLeaveTypeVM>>(leaveTypes);
+            var model = _mapper.Map<List<LeaveType>, List<LeaveTypeVM>>(leaveTypes);
 
             return View(model);
+        }
+
+        // GET: LeaveTypes/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        //POST: LeaveTypes/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(LeaveTypeVM model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return View(model);
+
+                var leaveType = _mapper.Map<LeaveType>(model);
+                leaveType.DateCreated = DateTime.Now;
+
+                var isSucess = _repo.Create(leaveType);
+                if (!isSucess)
+                {
+                    ModelState.AddModelError("", "Something went wrong...");
+                    return View(model);
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Something went wrong...");
+                return View(model);
+            }
         }
     }
 }
