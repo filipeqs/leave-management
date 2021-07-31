@@ -67,6 +67,18 @@ namespace leave_management.Controllers
             }
         }
 
+        // GET LeaveTypes/Details/5
+        public IActionResult Details(int id)
+        {
+            if (!_repo.Exists(id))
+                return NotFound();
+
+            var leaveType = _repo.FindById(id);
+            var model = _mapper.Map<LeaveTypeVM>(leaveType);
+
+            return View(model);
+        }
+
         // GET: LeaveTypes/Edit/5
         public IActionResult Edit(int id)
         {
