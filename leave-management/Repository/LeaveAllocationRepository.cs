@@ -39,5 +39,11 @@ namespace leave_management.Repository
         }
 
         public bool Save() => _db.SaveChanges() < 0;
+
+        public bool HasAllocation(int leaveTypeId, string employeeId)
+        {
+            var period = DateTime.Now.Year;
+            return FindAll().Any(q => q.EmployeeId == employeeId && q.LeaveTypeId == leaveTypeId && q.Period == period);
+        }
     }
 }

@@ -4,5 +4,6 @@ namespace leave_management.Contracts
 {
     public interface ILeaveAllocationRepository : IRepositoryBase<LeaveAllocation>
     {
+        bool HasAllocation(int leaveTypeId, string employeeId);
     }
 }
