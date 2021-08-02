@@ -62,13 +62,13 @@
 <hr />
 
 <h2>Leave Allocations</h2>
-<div class="card" style="width: 18rem;">
+<div class="card">
     <ul class="list-group list-group-flush">
         @foreach (var allocation in Model.LeaveAllocations)
         {
             <li class="list-group-item">
                 <h6>
-                    @allocation.LeaveType.Name <span class="badge badge-secondary">@allocation.NumberOfDays</span> |
+                    @allocation.LeaveType.Name <span class="badge badge-secondary">@allocation.NumberOfDays</span>
                     <a asp-action="Edit" asp-route-id="@allocation.Id" class="btn btn-outline-warning">
                         <i class="fa fa-pencil"></i> Edit
                     </a>
@@ -78,6 +78,7 @@
     </ul>
 </div>
 
-<div>
-    <a asp-action="ListEmployees">Back to List</a>
+
+<div class="mt-2">
+    <a asp-action="ListEmployees" class="btn btn-outline-secondary btn-block">Back to List</a>
 </div>
