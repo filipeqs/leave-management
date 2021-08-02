@@ -18,7 +18,11 @@ namespace leave_management.Repository
 
         public ICollection<LeaveAllocation> FindAll() => _db.LeaveAllocations.Include(l => l.LeaveType).ToList();
 
-        public LeaveAllocation FindById(int id) => _db.LeaveAllocations.SingleOrDefault(l => l.Id == id);
+        public LeaveAllocation FindById(int id) => _db.LeaveAllocations
+            .Include(l => l.Employee)
+            .Include(l => l.LeaveType)
+            .SingleOrDefault(l => l.Id == id);
+
         public bool Exists(int id) => _db.LeaveAllocations.Any(l => l.Id == id);
 
         public bool Create(LeaveAllocation entity)
@@ -39,7 +43,7 @@ namespace leave_management.Repository
             return Save();
         }
 
-        public bool Save() => _db.SaveChanges() < 0;
+        public bool Save() => _db.SaveChanges() > 0;
 
         public bool HasAllocation(int leaveTypeId, string employeeId)
         {
