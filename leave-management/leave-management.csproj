@@ -28,8 +28,6 @@
     <None Remove="Mappings\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Contracts\" />
-    <Folder Include="Repository\" />
     <Folder Include="Mappings\" />
   </ItemGroup>
 </Project>
