@@ -3,6 +3,7 @@ using System.Linq;
 using leave_management.Data;
 using System.Collections.Generic;
 using leave_management.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace leave_management.Repository
 {
@@ -15,9 +16,17 @@ namespace leave_management.Repository
             _db = db;
         }
 
-        public ICollection<LeaveRequest> FindAll() => _db.LeaveRequests.ToList();
+        public ICollection<LeaveRequest> FindAll() => _db.LeaveRequests
+            .Include(l => l.RequestingEmployee)
+            .Include(l => l.ApprovedBy)
+            .Include(l => l.LeaveType)
+            .ToList();
 
-        public LeaveRequest FindById(int id) => _db.LeaveRequests.SingleOrDefault(l => l.Id == id);
+        public LeaveRequest FindById(int id) => _db.LeaveRequests
+            .Include(l => l.RequestingEmployee)
+            .Include(l => l.ApprovedBy)
+            .Include(l => l.LeaveType)
+            .SingleOrDefault(l => l.Id == id);
 
         public bool Exists(int id) => _db.LeaveRequests.Any(l => l.Id == id);
 
