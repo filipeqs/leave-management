@@ -49,5 +49,14 @@ namespace leave_management.Repository
         }
 
         public bool Save() => _db.SaveChanges() > 0;
+
+        public ICollection<LeaveRequest> GetLeaveRequestsByEmployee(string employeeId) => 
+            _db.LeaveRequests
+            .Where(l => l.RequestingEmployeeId == employeeId)
+            .Include(l => l.RequestingEmployee)
+            .Include(l => l.ApprovedBy)
+            .Include(l => l.LeaveType)
+            .ToList();
+
     }
 }
