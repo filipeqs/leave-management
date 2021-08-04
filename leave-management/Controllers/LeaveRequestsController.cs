@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,22 @@ namespace leave_management.Controllers
     public class LeaveRequestsController : Controller
     {
         private readonly ILeaveRequestRepository _leaveRequestRepository;
+        private readonly ILeaveTypeRepository _leaveTypeRepository;
+        private readonly ILeaveAllocationRepository _leaveAllocationRepository;
         private readonly IMapper _mapper;
         private readonly UserManager<Employee> _userManager;
 
         public LeaveRequestsController(
-            ILeaveRequestRepository leaveRequestRepository, 
+            ILeaveRequestRepository leaveRequestRepository,
+            ILeaveTypeRepository leaveTypeRepository,
+            ILeaveAllocationRepository leaveAllocationRepository,
             IMapper mapper,
             UserManager<Employee> userManager
             )
         {
             _leaveRequestRepository = leaveRequestRepository;
+            _leaveTypeRepository = leaveTypeRepository;
+            _leaveAllocationRepository = leaveAllocationRepository;
             _mapper = mapper;
             _userManager = userManager;
         }
@@ -57,21 +64,78 @@ namespace leave_management.Controllers
         // GET: LeaveRequestsController/Create
         public ActionResult Create()
         {
-            return View();
+            var leaveTypes = _leaveTypeRepository.FindAll();
+            var leaveTypeItems = leaveTypes.Select(q => new SelectListItem 
+            { 
+                Value = q.Id.ToString(), 
+                Text = q.Name 
+            });
+            var model = new CreateLeaveRequestVM { LeaveTypes = leaveTypeItems };
+
+            return View(model);
         }
 
         // POST: LeaveRequestsController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> Create(CreateLeaveRequestVM model)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var startDate = Convert.ToDateTime(model.StartDate);
+                var endDate = Convert.ToDateTime(model.EndDate);
+                var leaveTypes = _leaveTypeRepository.FindAll();
+                var leaveTypeItems = leaveTypes.Select(q => new SelectListItem
+                {
+                    Value = q.Id.ToString(),
+                    Text = q.Name
+                });
+                model.LeaveTypes = leaveTypeItems;
+
+                if (!ModelState.IsValid)
+                    return View(model);
+
+                if (DateTime.Compare(startDate, endDate) >= 1)
+                {
+                    ModelState.AddModelError("", "Start Date needs to be earlier than End Date");
+                    return View(model);
+                }
+
+                var employee = await _userManager.GetUserAsync(User);
+                var allocation = _leaveAllocationRepository.GetLeaveAllocationByEmployeeAndType(employee.Id, model.LeaveTypeId);
+                int daysRequested = (int)(endDate - startDate).TotalDays;
+
+                if (daysRequested > allocation.NumberOfDays)
+                {
+                    ModelState.AddModelError("", "You do not have Sufficient Days for this Request");
+                    return View(model);
+                }
+
+                var leaveRequestModel = new LeaveRequestVM
+                {
+                    RequestingEmployeeId = employee.Id,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Approved = null,
+                    DateRequested = DateTime.Now,
+                    DateActioned = DateTime.Now,
+                    LeaveTypeId = model.LeaveTypeId
+                };
+
+                var leaveRequest = _mapper.Map<LeaveRequest>(leaveRequestModel);
+                var isSuccess = _leaveRequestRepository.Create(leaveRequest);
+                if (!isSuccess)
+                {
+                    ModelState.AddModelError("", "Something went wrong...");
+                    return View(model);
+                }
+
+                return RedirectToAction(nameof(Index), "Home");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ModelState.AddModelError("", "Something went wrong...");
+                return View(model);
             }
         }
 
