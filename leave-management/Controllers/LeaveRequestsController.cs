@@ -58,7 +58,67 @@ namespace leave_management.Controllers
         // GET: LeaveRequestsController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            if (!_leaveAllocationRepository.Exists(id))
+                return NotFound();
+
+            var leaveRequest = _leaveRequestRepository.FindById(id);
+            var model = _mapper.Map<LeaveRequestVM>(leaveRequest);
+
+            return View(model);
+        }
+
+        public async Task<ActionResult> ApproveRequest (int id)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (!_leaveAllocationRepository.Exists(id))
+                    return NotFound();
+
+                var leaveRequest = _leaveRequestRepository.FindById(id);
+                var employeeId = leaveRequest.RequestingEmployeeId;
+                var leaveTypeId = leaveRequest.LeaveTypeId; 
+                var leaveAllocation = _leaveAllocationRepository.GetLeaveAllocationByEmployeeAndType(employeeId, leaveTypeId);
+
+                int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
+                leaveAllocation.NumberOfDays -= daysRequested;
+
+                leaveRequest.Approved = true;
+                leaveRequest.ApprovedById = user.Id;
+                leaveRequest.DateActioned = DateTime.Now;
+
+                _leaveRequestRepository.Update(leaveRequest);
+                _leaveAllocationRepository.Update(leaveAllocation);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        public async Task<ActionResult> RejectRequest(int id)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (!_leaveAllocationRepository.Exists(id))
+                    return NotFound();
+
+                var leaveRequest = _leaveRequestRepository.FindById(id);
+                leaveRequest.Approved = false;
+                leaveRequest.ApprovedById = user.Id;
+                leaveRequest.DateActioned = DateTime.Now;
+
+                var isSuccess = _leaveRequestRepository.Update(leaveRequest);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // GET: LeaveRequestsController/Create

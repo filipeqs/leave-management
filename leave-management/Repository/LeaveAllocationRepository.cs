@@ -51,21 +51,21 @@ namespace leave_management.Repository
             return FindAll().Any(q => q.EmployeeId == employeeId && q.LeaveTypeId == leaveTypeId && q.Period == period);
         }
 
-        public ICollection<LeaveAllocation> GetLeaveAllocationsByEmployee(string id)
+        public ICollection<LeaveAllocation> GetLeaveAllocationsByEmployee(string employeeId)
         {
             var period = DateTime.Now.Year;
             return _db.LeaveAllocations
-                .Where(l => l.EmployeeId == id && l.Period == period)
+                .Where(l => l.EmployeeId == employeeId && l.Period == period)
                 .Include(l => l.LeaveType)
                 .ToList();
         }
 
-        public LeaveAllocation GetLeaveAllocationByEmployeeAndType(string id, int leaveTypeId)
+        public LeaveAllocation GetLeaveAllocationByEmployeeAndType(string employeeId, int leaveTypeId)
         {
             var period = DateTime.Now.Year;
             return _db.LeaveAllocations
                 .Include(l => l.LeaveType)
-                .SingleOrDefault(l => l.EmployeeId == id && l.Period == period && l.LeaveTypeId == leaveTypeId);
+                .SingleOrDefault(l => l.EmployeeId == employeeId && l.Period == period && l.LeaveTypeId == leaveTypeId);
         }
     }
 }
