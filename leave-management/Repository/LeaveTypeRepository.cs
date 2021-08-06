@@ -3,6 +3,8 @@ using System.Linq;
 using leave_management.Data;
 using System.Collections.Generic;
 using leave_management.Contracts;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace leave_management.Repository
 {
@@ -15,35 +17,30 @@ namespace leave_management.Repository
             _db = db;
         }
 
-        public ICollection<LeaveType> FindAll() => _db.LeaveTypes.ToList();
+        public async Task<ICollection<LeaveType>> FindAll() => await _db.LeaveTypes.ToListAsync();
 
-        public LeaveType FindById(int id) => _db.LeaveTypes.SingleOrDefault(l => l.Id == id);
+        public async Task<LeaveType> FindById(int id) => await _db.LeaveTypes.SingleOrDefaultAsync(l => l.Id == id);
 
-        public bool Exists(int id) => _db.LeaveTypes.Any(l => l.Id == id);
+        public async Task<bool> Exists(int id) => await _db.LeaveTypes.AnyAsync(l => l.Id == id);
 
-        public bool Create(LeaveType entity)
+        public async Task<bool> Create(LeaveType entity)
         {
-            _db.LeaveTypes.Add(entity);
-            return Save();
+            await _db.LeaveTypes.AddAsync(entity);
+            return await Save();
         }
 
-        public bool Update(LeaveType entity)
+        public async Task<bool> Update(LeaveType entity)
         {
             _db.LeaveTypes.Update(entity);
-            return Save();
+            return await Save();
         }
 
-        public bool Delete(LeaveType entity)
+        public async Task<bool> Delete(LeaveType entity)
         {
             _db.LeaveTypes.Remove(entity);
-            return Save();
+            return await Save();
         }
 
-        public bool Save() => _db.SaveChanges() > 0;
-
-        public ICollection<LeaveType> GetEmployeesByLeaveType(int id)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<bool> Save() => await _db.SaveChangesAsync() > 0;
     }
 }
