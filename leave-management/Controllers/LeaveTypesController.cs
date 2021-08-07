@@ -116,7 +116,8 @@ namespace leave_management.Controllers
             }
         }
 
-        // GET: LeaveTypes/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             try
