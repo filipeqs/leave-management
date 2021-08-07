@@ -63,7 +63,7 @@ namespace leave_management.Repository
             if (includes != null)
             {
                 foreach (var table in includes)
-                    query.Include(table);
+                    query = query.Include(table);
             }
 
             if (orderBy != null)

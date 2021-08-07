@@ -16,19 +16,22 @@ namespace leave_management.Controllers
     [Authorize(Roles = "Administrator")]
     public class LeaveTypesController : Controller
     {
-        private readonly ILeaveTypeRepository _repo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public LeaveTypesController(ILeaveTypeRepository repo, IMapper mapper)
+        public LeaveTypesController(
+            IUnitOfWork unitOfWork, 
+            IMapper mapper
+            )
         {
-            _repo = repo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
         // GET: LeaveTypes
         public async Task<IActionResult> Index()
         {
-            var leaveTypes = await _repo.FindAll();
+            var leaveTypes = await _unitOfWork.LeaveTypes.FindAll();
             var model = _mapper.Map<List<LeaveType>, List<LeaveTypeVM>>(leaveTypes.ToList());
 
             return View(model);
@@ -53,12 +56,8 @@ namespace leave_management.Controllers
                 var leaveType = _mapper.Map<LeaveType>(model);
                 leaveType.DateCreated = DateTime.Now;
 
-                var isSucess = await _repo.Create(leaveType);
-                if (!isSucess)
-                {
-                    ModelState.AddModelError("", "Something went wrong...");
-                    return View(model);
-                }
+                await _unitOfWork.LeaveTypes.Create(leaveType);
+                await _unitOfWork.Save();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -72,10 +71,10 @@ namespace leave_management.Controllers
         // GET LeaveTypes/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            if (!(await _repo.Exists(id)))
+            if (!(await _unitOfWork.LeaveTypes.Exists(q => q.Id == id)))
                 return NotFound();
 
-            var leaveType = await _repo.FindById(id);
+            var leaveType = await _unitOfWork.LeaveTypes.Find(q => q.Id == id);
             var model = _mapper.Map<LeaveTypeVM>(leaveType);
 
             return View(model);
@@ -84,10 +83,10 @@ namespace leave_management.Controllers
         // GET: LeaveTypes/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            if (!(await _repo.Exists(id)))
+            if (!(await _unitOfWork.LeaveTypes.Exists(q => q.Id == id)))
                 return NotFound();
 
-            var leaveType = await _repo.FindById(id);
+            var leaveType = await _unitOfWork.LeaveTypes.Find(q => q.Id == id);
             var model = _mapper.Map<LeaveTypeVM>(leaveType);
 
             return View(model);
@@ -105,12 +104,8 @@ namespace leave_management.Controllers
 
                 var leaveType = _mapper.Map<LeaveType>(model);
 
-                var isSuccess = await _repo.Update(leaveType);
-                if (!isSuccess)
-                {
-                    ModelState.AddModelError("", "Something went wrond...");
-                    return View(model);
-                }
+                _unitOfWork.LeaveTypes.Update(leaveType);
+                await _unitOfWork.Save();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -126,13 +121,12 @@ namespace leave_management.Controllers
         {
             try
             {
-                if (!(await _repo.Exists(id)))
+                if (!(await _unitOfWork.LeaveTypes.Exists(q => q.Id == id)))
                     return NotFound();
 
-                var leaveType = await _repo.FindById(id);
-                var isSuccess = await _repo.Delete(leaveType);
-                if (!isSuccess)
-                    return BadRequest();
+                var leaveType = await _unitOfWork.LeaveTypes.Find(q => q.Id == id);
+                _unitOfWork.LeaveTypes.Delete(leaveType);
+                await _unitOfWork.Save();
 
                 return RedirectToAction(nameof(Index));
             }
