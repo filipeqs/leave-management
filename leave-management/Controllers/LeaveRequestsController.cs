@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace leave_management.Controllers
         {
             var employee = await _userManager.GetUserAsync(User);
             var employeeId = employee.Id;
-            var employeeAllocations = await _unitOfWork.LeaveAllocations.FindAll(q => q.EmployeeId == employeeId, includes: new List<string> { "LeaveType" });
+            var employeeAllocations = await _unitOfWork.LeaveAllocations.FindAll(q => q.EmployeeId == employeeId, includes: q => q.Include(x => x.LeaveType));
             var employeeRequests = await _unitOfWork.LeaveRequests.FindAll(q => q.RequestingEmployeeId == employeeId);
 
             var employeeAllocationsModel = _mapper.Map<List<LeaveAllocationVM>>(employeeAllocations);
@@ -74,7 +75,7 @@ namespace leave_management.Controllers
             if (!(await _unitOfWork.LeaveRequests.Exists(q => q.Id == id)))
                 return NotFound();
 
-            var leaveRequest = await _unitOfWork.LeaveRequests.Find(q => q.Id == id, new List<string> { "ApprovedBy", "RequestingEmployee" });
+            var leaveRequest = await _unitOfWork.LeaveRequests.Find(q => q.Id == id, q => q.Include(x => x.ApprovedBy).Include(x => x.RequestingEmployee));
             var model = _mapper.Map<LeaveRequestVM>(leaveRequest);
 
             return View(model);
